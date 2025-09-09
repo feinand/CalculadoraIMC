@@ -45,6 +45,14 @@ const weightInput = document.querySelector("#weight");
 const calcBtn = document.querySelector("#calc-btn");
 const clearBtn = document.querySelector("#clear-btn");
 
+const calcContainer = document.querySelector("#calc-container");
+const resultContainer = document.querySelector("#result-container");
+
+const imcNumber = document.querySelector("#imc-number span");
+const imcInfo = document.querySelector("#imc-info span");
+
+const backBtn = document.querySelector("#back-btn");
+
 //Funções
     function createTable(data) {
   data.forEach((item) => {
@@ -68,15 +76,26 @@ const clearBtn = document.querySelector("#clear-btn");
   });
 }
 
-function cleanInputs(){
-    heightInput.value = "";
-    weightInput.value = "";
-}
-
 function validDigits(text) {
     return text.replace(/[^0-9,]/g, "");
 }
 
+function calcImc(weight, height) {
+    const imc = (weight / (height * height)).toFixed(1);
+     return imc;
+}
+
+function cleanInputs(){
+    heightInput.value = "";
+    weightInput.value = "";
+    imcNumber.className = "";
+    imcInfo.className = "";
+}
+
+function showOrHideResults() {
+    calcContainer.classList.toggle("hide");
+    resultContainer.classList.toggle("hide");
+}
 
 //Inicialização
 createTable(data);
@@ -87,10 +106,67 @@ createTable(data);
         const updatedValue = validDigits(e.target.value);
 
         e.target.value = updatedValue;
-    })
-})
+    });
+});
+
+calcBtn.addEventListener("click", (e) =>{
+    e.preventDefault();
+
+    const weight = +weightInput.value.replace(",", ".");
+    const height = +heightInput.value.replace(",", ".");
+
+    console.log(weight, height);
+
+    if(!weight || !height) return;
+
+    const imc = calcImc(weight, height);
+
+    let info;
+
+    data.forEach((item) => {
+      if(imc >= item.min && imc <= item.max) {
+        info = item.info;
+      }
+    });
+
+    if (!info) return;
+
+    imcNumber.innerText = imc;
+    imcInfo.innerText = info;
+
+    switch (info) {
+      case "Magreza":
+        imcNumber.classList.add("low");
+        imcInfo.classList.add("low");
+        break;
+      case "Normal":
+        imcNumber.classList.add("good");
+        imcInfo.classList.add("good");
+        break;
+      case "Sobrepeso":
+        imcNumber.classList.add("low");
+        imcInfo.classList.add("low");
+        break;
+      case "Obesidade":
+        imcNumber.classList.add("medium");
+        imcInfo.classList.add("medium");
+        break;
+      case "Obesidade grave":
+        imcNumber.classList.add("high");
+        imcInfo.classList.add("high");
+        break;
+    }
+
+    showOrHideResults();
+});
 
 clearBtn.addEventListener("click", (e) => {
     e.preventDefault();
+
     cleanInputs();
-})
+});
+
+backBtn.addEventListener("click", () => {
+  cleanInputs();
+  showOrHideResults();
+});
